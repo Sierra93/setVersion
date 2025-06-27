@@ -34,7 +34,7 @@ type BookstackPageDetails struct {
 
 // calculatedVersion - Вычисленная версия.
 var calculatedVersion string
-var basePagesUrl = "https://bookstack-ext.ntcees.ru/api/pages"
+var basePagesUrl = "***api_bookstack***"
 
 func main() {
 	if len(os.Args) == 0 {
@@ -346,7 +346,7 @@ func getHtmlFromBookstack(id int) (pageDetails BookstackPageDetails) {
 setHttpHeaders - Записывает заголовки HTTP-запроса.
 */
 func setHttpHeaders(req *http.Request) {
-	req.Header.Add("Authorization", "Token L0oSjMWvNDxqjhYPhdCSKsvgDsBifqCj:6iTEfYJKZ2RlIG99NOBLvCnFLGzPVPsR")
+	req.Header.Add("Authorization", "Token access_token")
 	req.Header.Add("Content-Type", "application/json")
 }
 
