@@ -1,0 +1,4 @@
+github.com/csotherden/strftime v1.0.0 h1:wF55J1T3CdRovvLsz57O/lj1JmBbCA9nAVRAmZ9IFrI=
+github.com/csotherden/strftime v1.0.0/go.mod h1:XcoVuNBsC8o3lrZ0whQqkUyjWQwCTS4X0lswTN4Y7vE=
+golang.org/x/net v0.41.0 h1:vBTly1HeNPEn3wtREYfy4GZ/NECgw2Cnl+nK6Nz3uvw=
+golang.org/x/net v0.41.0/go.mod h1:B/K4NNqkfmg07DQYrbwvSluqCJOOXwUjeb/5lOisjbA=
