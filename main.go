@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -31,8 +32,9 @@ type BookstackPageDetails struct {
 	RawHtml string `json:"raw_html"`
 }
 
-// CalculatedVersion - Вычисленная версия.
-var CalculatedVersion string
+// calculatedVersion - Вычисленная версия.
+var calculatedVersion string
+var basePagesUrl = "https://bookstack-ext.ntcees.ru/api/pages"
 
 func main() {
 	if len(os.Args) == 0 {
@@ -75,10 +77,10 @@ func checkFileExists(filename string) bool {
 createVersionJsonFile Создает json-файл для хранения версии.
 */
 func createVersionJsonFile(versionFromInput string) {
-	CalculatedVersion = "1.1." + versionFromInput + "." + generateSha1FromCurrentDateAndTime()
+	calculatedVersion = "1.1." + versionFromInput + "." + generateSha1FromCurrentDateAndTime()
 
 	version := Version{
-		Version: CalculatedVersion,
+		Version: calculatedVersion,
 	}
 
 	jsonData, err := json.MarshalIndent(version, "", "  ") // "" для префикса, " " для отступов.
@@ -124,7 +126,7 @@ changeAndSaveHtmlVersionBookstack - Изменяет html данные в Bookst
 */
 func changeAndSaveHtmlVersionBookstack(bookId, id int) {
 	// Получаем Html страницы с букстека и будем дополнять его.
-	htmlContent := getHtmlFromBookstack()
+	htmlContent := getHtmlFromBookstack(id)
 
 	// Изменяем html.
 	changedHtml := changeHtml(htmlContent.Html)
@@ -148,7 +150,7 @@ func changeHtml(htmlContent string) string {
 	f = func(n *html.Node) {
 		if n.Type == html.ElementNode && n.Data == "table" {
 			dateTime := getCurrentLocalDateTime()
-			addRow(n, []string{dateTime, CalculatedVersion})
+			addRow(n, []string{dateTime, calculatedVersion})
 
 			parseTable(n)
 		}
@@ -191,7 +193,12 @@ func updateVersionBookstack(changedHtml string, bookId, id int) {
 		log.Fatalf("Ошибка при подготовке запроса на обновление страницы с Bookstack: %v\n", err)
 	}
 
-	req, err := http.NewRequest("PUT", "https://bookstack-ext.ntcees.ru/api/pages/139", bytes.NewBuffer(jsonBytes))
+	params := url.Values{}
+	params.Add("id", strconv.Itoa(id))
+
+	fullUrl := basePagesUrl + "/" + params.Get("id")
+
+	req, err := http.NewRequest(http.MethodPut, fullUrl, bytes.NewBuffer(jsonBytes))
 
 	if err != nil {
 		log.Fatalf("Ошибка подготовки запроса на обновление страницы Bookstack: %v\n", err)
@@ -287,8 +294,13 @@ func findElement(n *html.Node, tag string) *html.Node {
 /*
 getHtmlFromBookstack - Получает контент страницы с Bookstack.
 */
-func getHtmlFromBookstack() (pageDetails BookstackPageDetails) {
-	req, err := http.NewRequest("GET", "https://bookstack-ext.ntcees.ru/api/pages/139", nil)
+func getHtmlFromBookstack(id int) (pageDetails BookstackPageDetails) {
+	params := url.Values{}
+	params.Add("id", strconv.Itoa(id))
+
+	fullUrl := basePagesUrl + "/" + params.Get("id")
+
+	req, err := http.NewRequest(http.MethodGet, fullUrl, nil)
 
 	if err != nil {
 		log.Fatalf("Ошибка подготовки запроса на получение страницы с Bookstack: %v\n", err)
